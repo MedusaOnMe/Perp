@@ -19,6 +19,7 @@ const REGISTRATION_TYPES = {
   Registration: [
     { name: 'brokerId', type: 'string' },
     { name: 'chainId', type: 'uint256' },
+    { name: 'chainType', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'registrationNonce', type: 'uint64' },
   ],
@@ -101,13 +102,13 @@ export class OrderlyWallet {
     chainId: number,
     registrationNonce: string
   ): Promise<{ message: RegisterAccountMessage; signature: string }> {
-    const timestamp = Date.now().toString();
+    const timestamp = Date.now();
 
     const message: RegisterAccountMessage = {
       brokerId,
       chainId,
       chainType: 'EVM' as ChainType,
-      timestamp,
+      timestamp: timestamp.toString(),
       registrationNonce,
     };
 
