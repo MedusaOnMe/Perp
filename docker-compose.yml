@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # API Server
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Tweet Listener Worker
+  tweet-listener:
+    build: .
+    command: node dist/workers/tweet-listener.js
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  # Export Monitor Worker
+  export-monitor:
+    build: .
+    command: node dist/workers/export-monitor.js
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  # Deposit Monitor Worker
+  deposit-monitor:
+    build: .
+    command: node dist/workers/deposit-monitor.js
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    restart: unless-stopped
+    depends_on:
+      - api
+
+networks:
+  default:
+    name: xperps-network
